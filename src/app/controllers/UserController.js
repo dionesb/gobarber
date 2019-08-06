@@ -1,5 +1,6 @@
 import * as Yup from 'yup'; // importa todas as funções da extensão Yup
 import User from '../models/User';
+import File from '../models/File';
 
 class UserController {
   async store(req, res) {
@@ -94,14 +95,24 @@ class UserController {
 
     /* Altera usuário com os novo dados informadose, e retornar apenas os
     dados que o usuário precisa visualizar */
-    const { id, name, provider } = await user.update(req.body);
+    await user.update(req.body);
+
+    const { id, name, avatar } = await User.findByPk(req.userId, {
+      include: [
+        {
+          model: File,
+          as: 'avatar',
+          attributes: ['id', 'path', 'url'],
+        },
+      ],
+    });
 
     /* Retorna as informações atualizadas em formato Json */
     return res.json({
       id,
       name,
       email,
-      provider,
+      avatar,
     });
   }
 }

@@ -188,7 +188,7 @@ class AppointmentController {
     /* Atribui a data momento de cancelamento. */
     appointment.canceled_at = new Date();
 
-    /* Sava o Appointment no banco */
+    /* Salva o Appointment no banco */
     await appointment.save();
 
     await Queue.add(CancellationMail.key, {

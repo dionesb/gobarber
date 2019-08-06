@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'; // Importação do jwt utilizado para gerar o token.
 import User from '../models/User'; // Importação do Model User.
+import File from '../models/File';
 import authConfig from '../../config/auth'; // Importação das configuraçõe de
 // autenticação.
 
@@ -19,7 +20,12 @@ class SessionController {
 
     /* Verifica se existe um usúario com o email passado. Caso não exista retorna
     um erro 401 */
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({
+      where: { email },
+      include: [
+        { model: File, as: 'avatar', attributes: ['id', 'path', 'url'] },
+      ],
+    });
     if (!user) {
       res.status(401).json({ error: 'User not found' });
     }
@@ -31,7 +37,7 @@ class SessionController {
     }
 
     /* Desestrutura o objeto user para obter id e name */
-    const { id, name } = user;
+    const { id, name, avatar, provider } = user;
 
     /* Responde com os dados do usuário e o token criado para atutenticação */
     return res.json({
@@ -39,6 +45,8 @@ class SessionController {
         id,
         name,
         email,
+        provider,
+        avatar,
       },
       token: jwt.sign({ id }, authConfig.secret, {
         expiresIn: authConfig.expiresIn,
